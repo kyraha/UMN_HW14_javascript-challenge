@@ -23,12 +23,19 @@ function reformatDate(inputValue) {
     return parsed_dt;
 }
 
-function renderTable(dateFilter) {
+function renderTable(dateFilter, inputCity, inputState, inputCountry, inputShape) {
     let tbody = d3.select("tbody");
     let counter = 0;
     tbody.text("");
     data.forEach(sighting => {
-        if(dateFilter.length == 0 || sighting.datetime === dateFilter) {
+        if(
+            (dateFilter === undefined || dateFilter.length == 0 || sighting.datetime === dateFilter) &&
+            (inputCity === undefined || inputCity.length == 0 || sighting.city === inputCity.toLowerCase()) &&
+            (inputState === undefined || inputState.length == 0 || inputState.toLowerCase() === sighting.state) &&
+            (inputCountry === undefined || inputCountry.length == 0 || inputCountry.toLowerCase() === sighting.country) &&
+            (inputShape === undefined || inputShape.length == 0 || inputShape.toLowerCase() === sighting.shape)
+        )
+        {
             row = tbody.append("tr");
             Object.entries(sighting).forEach(([key, value]) => {
                 var cell = row.append("td");
@@ -37,11 +44,13 @@ function renderTable(dateFilter) {
             counter++;
         }
     })
-    if(counter == 0) {
-        let td = tbody.append("tr").append("td");
-        td.attr("colspan", 7);
-        td.text("No sightings were recorded for this date.")
-        console.log(td);
+    let td = tbody.append("tr").append("td");
+    td.attr("colspan", 7);
+if(counter == 0) {
+        td.text("No sightings were found on your criteria. Try other filters.")
+    }
+    else {
+        td.text(`Total ${counter} sightings found by the criteria.`)
     }
 }
 
@@ -58,10 +67,18 @@ function runEnter() {
   // Get the value property of the input element
   var inputValue = inputElement.property("value");
 
-  // Print the value to the console
-  // console.log(reformatDate(inputValue));
+  var inputCity = d3.select("#city").property("value");
+  var inputState = d3.select("#state").property("value");
+  var inputCountry = d3.select("#country").property("value");
+  var inputShape = d3.select("#shape").property("value");
 
-  renderTable(reformatDate(inputValue));
+  renderTable(
+      reformatDate(inputValue),
+      inputCity,
+      inputState,
+      inputCountry,
+      inputShape
+    );
 }
 
 renderTable("");
